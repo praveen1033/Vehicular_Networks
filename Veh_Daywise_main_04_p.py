@@ -193,7 +193,7 @@ del temp_df
 test_df =  dict_of_org_dfs[datetime.date(2018, 4, 6)]
 #test_df = test_df[(test_df.datetime_time >= datetime.datetime.strptime("7:00:00","%H:%M:%S").time()) & (test_df.datetime_time >= datetime.datetime.strptime("9:00:00","%H:%M:%S").time())]
 test_df = test_df[test_df.tmc_id.isin(tmc_in_sp)]
-test_df = test_df[(test_df.datetime_time >= datetime.datetime.strptime("10:00:00","%H:%M:%S").time()) & (test_df.datetime_time < datetime.datetime.strptime("11:00:00","%H:%M:%S").time())]
+test_df = test_df[(test_df.datetime_time >= datetime.datetime.strptime("10:00:00","%H:%M:%S").time()) & (test_df.datetime_time < datetime.datetime.strptime("10:15:00","%H:%M:%S").time())]
 ####################### new approach: end #########################
 
 print('here2: ', datetime.datetime.now().time())
@@ -277,7 +277,7 @@ false_df = false_df.reset_index()
 
 rand_4 = pd.DataFrame(np.random.randint(0,5,size=(len(false_df), 1)), columns=['rand'])
  
-false_df['SP'] = false_df['SP'] + deltaAvg + rand_4['rand']
+false_df['SP'] = false_df['SP'] - deltaAvg - rand_4['rand']
 
 final_df = test_df.groupby('tmc_id')['SP'].apply(list)
 
@@ -343,6 +343,9 @@ for i in range(N):
             
 print('here7: ', datetime.datetime.now().time())
 l1_original = l_original.apply(np.sort, axis = 1)
+
+for j in range(N):
+    l1_original[j] = [i for i in l1_original[j] if i != 0]
  
 K=4
  
@@ -371,7 +374,7 @@ for i in range(N):
     for j in range(len(TMCwise[i])):
         w.iloc[i,j] = cw.iloc[i,j]/np.sum(cw.iloc[i,:])
         
-eeta = 2;
+eeta = 6;
 R = np.zeros(shape=N)
 print('here9: ', datetime.datetime.now().time())
 
@@ -381,11 +384,11 @@ for TM in range(N):
     
 
     for j in range(len(TMCwise[TM])):
-        if l_original.iloc[TM,j] == 1:
+        if l1_original.iloc[TM][j] == 1:
             I.iloc[0,j] = 1
-        elif l_original.iloc[TM,j] == 2:
+        elif l1_original.iloc[TM][j] == 2:
             I.iloc[1,j] = 1
-        elif l_original.iloc[TM,j] == 3:
+        elif l1_original.iloc[TM][j] == 3:
             I.iloc[2,j] = 1
         else:
             I.iloc[3,j] = 1
@@ -421,16 +424,16 @@ ax = fig.add_subplot(111)
 axes = plt.gca()
 plt.hold(True)
 for i in range(N):
-    if i<37:
+    if i<39:
         plt.plot(xax[i],TR[i],'bo')
-    elif i==37:
+    elif i==39:
         plt.plot(xax[i],TR[i],'bo', label = "Non-Anomalous TMC")
     elif i==62:
         plt.plot(xax[i],TR[i],'r*', label = "Anomalous TMC")
     else:
         plt.plot(xax[i],TR[i],'r*')
         
-plt.axhline(y=0.472, color='g', linestyle='-.')
+plt.axhline(y=0.672, color='g', linestyle='-.')
 
 plt.xlabel('TMC ID',fontsize = 20)
 plt.ylabel('Trust Score',fontsize = 20)
